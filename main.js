@@ -1,54 +1,99 @@
+const formularioCalculadora = document.getElementById('formulario-calorias');
+const resultado = document.getElementById('resultado');
+const retornoButton = document.getElementById('retorno');
+
+retornoButton.addEventListener('click', () => {
+   
+    formularioCalculadora.reset();
+    
+    resultado.innerHTML = '';
+    
+    
+    mostrarFormulario();
+});
+
+formularioCalculadora.addEventListener('submit', (evento) => {
+    evento.preventDefault();
+    calcularCalorias();
+});
 
 function calcularCalorias() {
- //Formula hombres: valor actividad x (10 x peso en kg) + (6,25 × altura en cm) - (5 × edad en años) + 5
- //Formula mujeres: valor actividad x (10 x peso en kg) + (6,25 × altura en cm) - (5 × edad en años) - 161
-}
+    const nombre = document.querySelector('#nombre').value;
+    const tipoDocumento = document.querySelector('#tipo-documento').value;
+    const documento = document.querySelector('#documento').value;
+    const edad = document.querySelector('#edad').value;
+    const peso = document.querySelector('#peso').value;
+    const altura = document.querySelector('#altura').value;
+    const actividad = document.querySelector('#actividad').value;
+    const sexo = document.querySelector('input[name="sexo"]:checked').value;
 
-function mostrarMensajeDeError(msg) {
-    const calculo = document.querySelector('#calculo');
-    if (calculo) {
-        calculo.remove();
+    const multiplicadorTMB = {
+        peso: 10,
+        altura: 6.25,
+        edad: 5,
+    };
+
+    let mensajeEdad = '';
+    let imagenEdad = '';
+
+    if(sexo === 'F'){
+        if(edad >=15 && edad <= 29){
+            mensajeEdad = 'Joven';
+            imagenEdad = 'img/mujer.png';
+        }else if (edad >= 30 && edad <= 59){
+            mensajeEdad = 'Adulto';
+            imagenEdad = 'img/adulta.png';
+        }else{
+            mensajeEdad = 'Adulto Mayor';
+            imagenEdad = 'img/anciana.png';
+        }
+    }else{
+        if(edad >=15 && edad <= 29){
+            mensajeEdad = 'Joven';
+            imagenEdad = 'img/hombre.png';
+        }else if (edad >= 30 && edad <= 59){
+            mensajeEdad = 'Adulto';
+            imagenEdad = 'img/adulto.png';
+        }else{
+            mensajeEdad = 'Adulto Mayor';
+            imagenEdad = 'img/anciano.png';
+        }
     }
 
-    const divError = document.createElement('div');
-    divError.className = 'd-flex justify-content-center align-items-center h-100';
-    divError.innerHTML = `<span class="alert alert-danger text-center">${msg}</span>`;
+    let calculoCalorias = sexo === 'femenino' ?
+    actividad * ((multiplicadorTMB.peso * peso) +
+    (multiplicadorTMB.altura * altura) -
+    (multiplicadorTMB.edad * edad)) - 161 :
+    actividad * ((multiplicadorTMB.peso * peso) +
+    (multiplicadorTMB.altura * altura) -
+    (multiplicadorTMB.edad * edad)) - 5;
 
-    resultado.appendChild(divError);
+    resultado.innerHTML = `
+        <h3>${nombre} - ${mensajeEdad}</h3>
+        <img src="${imagenEdad}" alt="${mensajeEdad}" style="width:150px; margin: 30px;">
+        <p class="text-center" style="font-size: 20px;">El paciente ${nombre} identificado con ${tipoDocumento} NO.${documento}, requiere un total de <span class="h6" style="font-size: 20px;">${Math.floor(calculoCalorias)} kcal</span> para el sostenimiento de su TBM.</p>
 
-    setTimeout(() => {
-        divError.remove();
-        desvanecerResultado();
-    }, 5000);
+    `
+
+    ocultarFormulario();
+
+    console.log(calculoCalorias);
 }
 
-
-// Animaciones
-function aparecerResultado() {
-    resultado.style.top = '100vh';
-    resultado.style.display = 'block';
-    
-    let distancia = 100;
-    let resta = 0.3;
-    let id = setInterval(() => {
-        resta *= 1.1;
-        resultado.style.top = `${distancia - resta}vh`;
-        if (resta > 100) {
-            clearInterval(id);
-        }
-    }, 10)
+function ocultarFormulario() {
+    formularioCalculadora.style.display = 'none';
+    formularioCalculadora.classList.add('hidden'); 
+    resultado.classList.remove('hidden');
+    retornoButton.style.display = '';
+    retornoButton.classList.remove('hiden');
+    document.body.classList.add('body-reset')
 }
 
-function desvanecerResultado() {
-    let distancia = 1;
-
-    let id = setInterval(() => {
-        distancia *= 2;
-        resultado.style.top = `${distancia}vh`;
-        if (distancia > 100) {
-            clearInterval(id);
-            resultado.style.display = 'none';
-            resultado.style.top = 0;
-        }
-    }, 10)
+function mostrarFormulario() {
+    formularioCalculadora.style.display = '';
+    formularioCalculadora.classList.remove('hidden');
+    retornoButton.classList.add('hiden');
+    retornoButton.style.display = 'none';
+    formularioCalculadora.classList.add('mostrar-animacion');
+    document.body.classList.remove('body-reset')
 }
